@@ -43,8 +43,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ResponseError> handleNotFoundException(NotFoundException ex) {
+    @ExceptionHandler(RecordNotFoundException.class)
+    public ResponseEntity<ResponseError> handleNotFoundException(RecordNotFoundException ex) {
         ResponseError response = new ResponseError(
                 ex.getMessage(),
                 HttpStatus.NOT_FOUND,
@@ -65,6 +65,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseError> handleException(Exception ex) {
+        ResponseError response = new ResponseError(
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(TransformatorException.class)
+    public ResponseEntity<ResponseError> handleTransformatorException(TransformatorException ex) {
         ResponseError response = new ResponseError(
                 ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR,
