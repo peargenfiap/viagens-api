@@ -1,5 +1,6 @@
 package br.com.pedroargentati.viagens_api.controller;
 
+import br.com.pedroargentati.viagens_api.common.rest.RestCommonService;
 import br.com.pedroargentati.viagens_api.dto.DepoimentosDTO;
 import br.com.pedroargentati.viagens_api.service.DepoimentosService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/depoimentos")
-public class DepoimentosController {
+public class DepoimentosController extends RestCommonService {
 
     private final DepoimentosService depoimentosService;
 
