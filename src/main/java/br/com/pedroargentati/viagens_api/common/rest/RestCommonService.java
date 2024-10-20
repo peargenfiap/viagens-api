@@ -1,7 +1,7 @@
 package br.com.pedroargentati.viagens_api.common.rest;
 
-import br.com.pedroargentati.viagens_api.exceptions.NotFoundException;
-import org.springframework.data.domain.Page;
+import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
+import br.com.pedroargentati.viagens_api.util.converter.Transformator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,8 +10,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RestCommonService {
 
@@ -38,11 +36,11 @@ public class RestCommonService {
     }
 
     // Método para construir uma resposta com uma entidade única
-    protected <T> ResponseEntity<T> buildResponseForEntity(T entity) throws NotFoundException {
+    protected <T> ResponseEntity<T> buildResponseForEntity(T entity) throws RecordNotFoundException {
         if (entity == null) {
-            throw new NotFoundException("Entidade não encontrada.");
+            throw new RecordNotFoundException("Entidade não encontrada.");
         }
-        return ResponseEntity.ok(entity);
+        return ResponseEntity.ok(Transformator.transform(entity));
     }
 
     // Método para construir uma resposta para um arquivo
