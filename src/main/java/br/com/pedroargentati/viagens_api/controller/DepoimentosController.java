@@ -29,7 +29,7 @@ public class DepoimentosController extends RestCommonService {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Depoimentos> obterDepoimentoPorId(@PathVariable Integer id) throws RecordNotFoundException {
+    public ResponseEntity<DepoimentosDTO> obterDepoimentoPorId(@PathVariable Integer id) throws RecordNotFoundException {
         return super.buildResponseForEntity(depoimentosService.obterDepoimentoPorId(id));
     }
 
@@ -43,6 +43,12 @@ public class DepoimentosController extends RestCommonService {
     public ResponseEntity<DepoimentosDTO> atualizarDepoimento(@RequestBody DepoimentosDTO dto) throws RecordNotFoundException {
         depoimentosService.atualizarDepoimento(dto);
         return super.buildResponseForPost(dto, dto.id());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Depoimentos> excluirDepoimento(@PathVariable Integer id) throws RecordNotFoundException {
+        var depoimento = depoimentosService.excluirDepoimento(id);
+        return super.buildResponseForDelete(depoimento);
     }
 
 }

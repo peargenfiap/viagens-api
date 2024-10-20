@@ -40,7 +40,11 @@ public class RestCommonService {
         if (entity == null) {
             throw new RecordNotFoundException("Entidade não encontrada.");
         }
-        return ResponseEntity.ok(Transformator.transform(entity));
+        return ResponseEntity.ok(entity);
+    }
+
+    protected <T> ResponseEntity<T> buildResponseForDelete(T entity) throws RecordNotFoundException {
+        return this.buildResponseForEntity(entity);
     }
 
     // Método para construir uma resposta para um arquivo

@@ -41,8 +41,8 @@ public class DepoimentosService {
      * @return Depoimentos - A entidade depoimento.
      * @throws RecordNotFoundException - Se o depoimento não for encontrado.
      */
-    public Depoimentos obterDepoimentoPorId(Integer id) throws RecordNotFoundException {
-        return depoimentosRepository.findById(id)
+    public DepoimentosDTO obterDepoimentoPorId(Integer id) throws RecordNotFoundException {
+        return depoimentosRepository.findById(id).map(DepoimentosDTO::new)
                 .orElseThrow(() -> new RecordNotFoundException("Depoimento com ID " + id + " não encontrado"));
     }
 
@@ -53,7 +53,9 @@ public class DepoimentosService {
      */
     @Transactional
     public void incluirDepoimento(DepoimentosDTO dto) throws RecordNotFoundException {
-        DataFile dataFile = this.dataFileService.obterDataFile(dto.idFile());
+        DataFile dataFile = dto.idFile() != null
+                ? this.dataFileService.obterDataFile(dto.idFile())
+                : null;
 
         Depoimentos depoimento = Depoimentos.builder()
                 .depoimento(dto.depoimento())
@@ -87,6 +89,20 @@ public class DepoimentosService {
                 .build();
 
         depoimentosRepository.save(depoimento);
+    }
+
+    /*
+     * Método responsável por excluir um depoimento.
+     *
+     * @param id - ID do depoimento.
+     */
+    @Transactional
+    public Depoimentos excluirDepoimento(Integer id) throws RecordNotFoundException {
+        Depoimentos depoimento = depoimentosRepository.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException("Depoimento com ID " + id + " não encontrado"));
+
+        depoimentosRepository.delete(depoimento);
+        return depoimento;
     }
 
 }
