@@ -3,6 +3,7 @@ package br.com.pedroargentati.viagens_api.service;
 import br.com.pedroargentati.viagens_api.dto.DataFileDTO;
 import br.com.pedroargentati.viagens_api.exceptions.FileProcessingException;
 import br.com.pedroargentati.viagens_api.exceptions.HashGenerationException;
+import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
 import br.com.pedroargentati.viagens_api.model.DataFile;
 import br.com.pedroargentati.viagens_api.repository.DataFileRepository;
 import br.com.pedroargentati.viagens_api.util.crypto.HashUtil;
@@ -27,6 +28,11 @@ public class DataFileService {
         Optional<DataFile> dataFile = dataFileRepository.findById(idFile);
         return dataFile.map(DataFileDTO::toDataFile)
                 .orElse(null);
+    }
+
+    public DataFile obterDataFile(String idFile) throws RecordNotFoundException {
+        return dataFileRepository.findById(idFile)
+                .orElseThrow(() -> new RecordNotFoundException("Arquivo com ID " + idFile + " não encontrado"));
     }
 
     /*

@@ -4,7 +4,7 @@ import br.com.pedroargentati.viagens_api.common.rest.RestCommonService;
 import br.com.pedroargentati.viagens_api.dto.DataFileDTO;
 import br.com.pedroargentati.viagens_api.exceptions.FileProcessingException;
 import br.com.pedroargentati.viagens_api.exceptions.HashGenerationException;
-import br.com.pedroargentati.viagens_api.exceptions.NotFoundException;
+import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
 import br.com.pedroargentati.viagens_api.service.DataFileService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class DataFileController extends RestCommonService {
     }
 
     @GetMapping("/{idFile}")
-    public ResponseEntity<DataFileDTO> obterDataFilePorChave(@PathVariable String idFile) throws NotFoundException {
+    public ResponseEntity<DataFileDTO> obterDataFilePorChave(@PathVariable String idFile) throws RecordNotFoundException {
         var dataFile = dataFileService.obterDataFilePorChave(idFile);
 
         return super.buildResponseForEntity(dataFile);

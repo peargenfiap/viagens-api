@@ -2,14 +2,15 @@ package br.com.pedroargentati.viagens_api.controller;
 
 import br.com.pedroargentati.viagens_api.common.rest.RestCommonService;
 import br.com.pedroargentati.viagens_api.dto.DepoimentosDTO;
+import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
+import br.com.pedroargentati.viagens_api.model.Depoimentos;
 import br.com.pedroargentati.viagens_api.service.DepoimentosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/depoimentos")
@@ -25,6 +26,23 @@ public class DepoimentosController extends RestCommonService {
     @GetMapping
     public Page<DepoimentosDTO> obterDepoimentos(@PageableDefault(size = 15) Pageable pageable) {
         return depoimentosService.obterListaDepoimentos(pageable);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Depoimentos> obterDepoimentoPorId(@PathVariable Integer id) throws RecordNotFoundException {
+        return super.buildResponseForEntity(depoimentosService.obterDepoimentoPorId(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<DepoimentosDTO> incluirDepoimento(@RequestBody DepoimentosDTO dto) throws RecordNotFoundException {
+        depoimentosService.incluirDepoimento(dto);
+        return super.buildResponseForPost(dto, dto.id());
+    }
+
+    @PutMapping
+    public ResponseEntity<DepoimentosDTO> atualizarDepoimento(@RequestBody DepoimentosDTO dto) throws RecordNotFoundException {
+        depoimentosService.atualizarDepoimento(dto);
+        return super.buildResponseForPost(dto, dto.id());
     }
 
 }
