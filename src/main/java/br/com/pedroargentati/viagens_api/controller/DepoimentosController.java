@@ -7,6 +7,7 @@ import br.com.pedroargentati.viagens_api.model.Depoimentos;
 import br.com.pedroargentati.viagens_api.service.DepoimentosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,11 @@ public class DepoimentosController extends RestCommonService {
     @GetMapping
     public Page<DepoimentosDTO> obterDepoimentos(@PageableDefault(size = 15) Pageable pageable) {
         return depoimentosService.obterListaDepoimentos(pageable);
+    }
+
+    @GetMapping("/home")
+    public Page<DepoimentosDTO> obterDepoimentosHome(@PageableDefault(size = 3) Pageable pageable) {
+        return depoimentosService.obterListaDepoimentosRandomicos(PageRequest.of(0, 3));
     }
 
     @GetMapping("/{id}")

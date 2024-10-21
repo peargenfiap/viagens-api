@@ -38,6 +38,20 @@ public class DepoimentosService {
                 .map(DepoimentosDTO::new);
     }
 
+    /**
+     * Método responsável por obter a lista de depoimentos randômicos.
+     *
+     * @param pageable - Objeto que contém informações sobre a paginação.
+     * @return Page<DepoimentosDTO> - Lista de depoimentos randômicos.
+     */
+    public Page<DepoimentosDTO> obterListaDepoimentosRandomicos(Pageable pageable) {
+        logger.info("Obtendo lista de depoimentos randômicos.");
+
+        Page<Depoimentos> depoimentosPage = depoimentosRepository.findRandomDepoimentos(pageable);
+
+        return depoimentosPage.map(DepoimentosDTO::new);
+    }
+
     /*
      * Método responsável por obter um depoimento por ID.
      *
@@ -85,7 +99,9 @@ public class DepoimentosService {
         Depoimentos depoimento = depoimentosRepository.findById(dto.id())
                 .orElseThrow(() -> new RecordNotFoundException("Depoimento com ID " + dto.id() + " não encontrado"));
 
-        DataFile dataFile = this.dataFileService.obterDataFile(dto.idFile());
+        DataFile dataFile = dto.idFile() != null
+                ? this.dataFileService.obterDataFile(dto.idFile())
+                : null;
 
         depoimento = Depoimentos.builder()
                 .id(depoimento.getId())
