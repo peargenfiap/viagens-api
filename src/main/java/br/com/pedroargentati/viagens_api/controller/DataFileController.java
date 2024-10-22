@@ -2,6 +2,7 @@ package br.com.pedroargentati.viagens_api.controller;
 
 import br.com.pedroargentati.viagens_api.common.rest.RestCommonService;
 import br.com.pedroargentati.viagens_api.dto.DataFileDTO;
+import br.com.pedroargentati.viagens_api.exceptions.BusinessException;
 import br.com.pedroargentati.viagens_api.exceptions.FileProcessingException;
 import br.com.pedroargentati.viagens_api.exceptions.HashGenerationException;
 import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
@@ -28,7 +29,7 @@ public class DataFileController extends RestCommonService {
     }
 
     @PostMapping
-    public ResponseEntity<DataFileDTO> incluirDataFile(@Valid @RequestBody DataFileDTO dto) throws HashGenerationException, FileProcessingException {
+    public ResponseEntity<DataFileDTO> incluirDataFile(@Valid @RequestBody DataFileDTO dto) throws HashGenerationException, FileProcessingException, BusinessException {
         dataFileService.incluirDataFile(dto);
         return super.buildResponseForPost(dto, dto.idFile());
     }

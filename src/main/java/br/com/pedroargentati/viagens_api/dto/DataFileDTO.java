@@ -12,7 +12,7 @@ public record DataFileDTO(String idFile, String fileName, String mediaType, Inte
                 dataFile.getFileName(),
                 dataFile.getMediaType(),
                 dataFile.getSize(),
-                Base64.getEncoder().encodeToString(dataFile.getData()).getBytes()
+                dataFile.getData() != null ? Base64.getEncoder().encodeToString(dataFile.getData()).getBytes() : null
         );
     }
 

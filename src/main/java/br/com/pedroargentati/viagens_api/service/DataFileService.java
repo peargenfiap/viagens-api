@@ -1,6 +1,7 @@
 package br.com.pedroargentati.viagens_api.service;
 
 import br.com.pedroargentati.viagens_api.dto.DataFileDTO;
+import br.com.pedroargentati.viagens_api.exceptions.BusinessException;
 import br.com.pedroargentati.viagens_api.exceptions.FileProcessingException;
 import br.com.pedroargentati.viagens_api.exceptions.HashGenerationException;
 import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
@@ -43,7 +44,11 @@ public class DataFileService {
      * @throws FileProcessingException - Erro ao processar o arquivo.
      */
     @Transactional
-    public void incluirDataFile(DataFileDTO dto) throws HashGenerationException, FileProcessingException {
+    public void incluirDataFile(DataFileDTO dto) throws HashGenerationException, FileProcessingException, BusinessException {
+        if (dto == null) {
+            throw new BusinessException("É necessário informar um corpo na requisição.");
+        }
+
         DataFile dataFile = new DataFile(dto);
 
         // Verificação de dados
