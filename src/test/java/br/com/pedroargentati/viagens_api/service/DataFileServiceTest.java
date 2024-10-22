@@ -6,6 +6,7 @@ import br.com.pedroargentati.viagens_api.exceptions.FileProcessingException;
 import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
 import br.com.pedroargentati.viagens_api.model.DataFile;
 import br.com.pedroargentati.viagens_api.repository.DataFileRepository;
+import br.com.pedroargentati.viagens_api.util.io.FileSecurityCheck;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayInputStream;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +31,9 @@ class DataFileServiceTest {
 
     @Mock
     private DataFileDTO dataFileDTO;
+
+    @Mock
+    private FileSecurityCheck fileSecurityCheck;
 
     @Test
     @DisplayName("[obterDataFilePorChave] - Deve retornar um DataFileDTO quando chave válida")
@@ -94,6 +100,7 @@ class DataFileServiceTest {
     }
 
     @Test
+    @DisplayName("[incluirDataFile] - Deve lançar uma exceção ao incluir um DataFile sem DataFile")
     void deveLancarExcecaoAoIncluirUmDataFileSemDataFile() {
         // Arrange
         DataFileDTO dto = null;
@@ -103,6 +110,7 @@ class DataFileServiceTest {
     }
 
     @Test
+    @DisplayName("[incluirDataFile] - Deve lançar uma exceção ao incluir um DataFile com DataFile null")
     void deveLancarExcecaoAoIncluirUmDataFileComDataNull() {
         // Arrange
         DataFileDTO dto = new DataFileDTO(
@@ -117,6 +125,7 @@ class DataFileServiceTest {
     }
 
     @Test
+    @DisplayName("[incluirDataFile] - Deve lançar uma exceção ao incluir um DataFile com DataFile vazio")
     void deveLancarExcecaoAoIncluirUmDataFileComDataVazio() {
         // Arrange
         DataFileDTO dto = new DataFileDTO(
@@ -128,6 +137,25 @@ class DataFileServiceTest {
 
         // Act + Assert
         Assertions.assertThrows(FileProcessingException.class, () -> this.dataFileService.incluirDataFile(dto));
+    }
+
+    @Test
+    void deveLancarFileProcessingExceptionQuandoCheckFalhar() throws Exception {
+        // Arrange
+        String idFile = "ec15d2f24e19845b77489e0a2af2f8af4bf36560";
+        String fileName = "arquivo.pdf";
+        String mediaType = "application/pdf";
+        byte[] data = "conteúdo do arquivo".getBytes();
+        Integer size = 120;
+        DataFileDTO dataFileDTO = new DataFileDTO(idFile, fileName, mediaType, size, data);
+
+        // Simular exceção quando o método check for chamado
+        Mockito.doThrow(new FileProcessingException("Erro ao processar o arquivo"))
+                .when(fileSecurityCheck)
+                .check(Mockito.eq(fileName), Mockito.eq(mediaType), Mockito.any(ByteArrayInputStream.class));
+
+        // Act & Assert
+        Assertions.assertThrows(FileProcessingException.class, () -> dataFileService.incluirDataFile(dataFileDTO));
     }
 
 }
