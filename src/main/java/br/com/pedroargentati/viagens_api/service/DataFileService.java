@@ -10,6 +10,7 @@ import br.com.pedroargentati.viagens_api.repository.DataFileRepository;
 import br.com.pedroargentati.viagens_api.util.crypto.HashUtil;
 import br.com.pedroargentati.viagens_api.util.io.FileSecurityCheck;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -21,8 +22,12 @@ public class DataFileService {
 
     private final DataFileRepository dataFileRepository;
 
-    public DataFileService(DataFileRepository dataFileRepository) {
+    private final FileSecurityCheck fileSecurityCheck;
+
+    @Autowired
+    public DataFileService(DataFileRepository dataFileRepository, FileSecurityCheck fileSecurityCheck) {
         this.dataFileRepository = dataFileRepository;
+        this.fileSecurityCheck = fileSecurityCheck;
     }
 
     public DataFileDTO obterDataFilePorChave(String idFile) {
@@ -57,7 +62,7 @@ public class DataFileService {
         }
 
         try (ByteArrayInputStream bis = new ByteArrayInputStream(dataFile.getData())) {
-            FileSecurityCheck.INSTANCE.check(dataFile.getFileName(), dataFile.getMediaType(), bis);
+            this.fileSecurityCheck.check(dataFile.getFileName(), dataFile.getMediaType(), bis);
         } catch (Exception e) {
             throw new FileProcessingException("Erro ao processar o arquivo", e);
         }
