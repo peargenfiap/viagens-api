@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -182,6 +183,7 @@ class DataFileServiceTest {
     }
 
     @Test
+    @DisplayName("[incluirDataFile] - Deve salvar DataFile quando não existir DataFile existente")
     void deveSalvarDataFileQuandoNaoExistirDataFileExistente() throws ViagensException {
         // Arrange
         String idFile = "ec15d2f24e19845b77489e0a2af2f8af4bf36560";
@@ -208,5 +210,40 @@ class DataFileServiceTest {
         Assertions.assertNotNull(dataFileSaved.getCreatedAt());
     }
 
+    @Test
+    @DisplayName("[incluirDataFile] - Deve reutilizar DataFile existente")
+    void deveReutilizarDataFileExistente() throws ViagensException {
+        // Arrange
+        String fileName = "arquivo.pdf";
+        String mediaType = "application/pdf";
+        byte[] data = "conteúdo do arquivo".getBytes();
+        Integer size = 120;
+        String idFile = HashUtil.calcularHash(data, "SHA-1");
+
+        this.dto = new DataFileDTO(idFile, fileName, mediaType, size, data);
+
+        DataFile existingDataFile = new DataFile();
+        existingDataFile.setIdFile(idFile);
+        existingDataFile.setFileName(fileName);
+        existingDataFile.setMediaType(mediaType);
+        existingDataFile.setSize(size);
+        existingDataFile.setData(data);
+        existingDataFile.setCreatedAt(new Date());
+
+        BDDMockito.given(dataFileRepository.findById(idFile))
+                .willReturn(Optional.of(existingDataFile));
+
+        // Act
+        dataFileService.incluirDataFile(this.dto);
+
+        // Assert
+        BDDMockito.then(dataFileRepository).should(BDDMockito.never()).save(BDDMockito.any(DataFile.class));
+
+        Assertions.assertEquals(fileName, existingDataFile.getFileName());
+        Assertions.assertEquals(mediaType, existingDataFile.getMediaType());
+        Assertions.assertEquals(size, existingDataFile.getSize());
+        Assertions.assertEquals(data, existingDataFile.getData());
+        Assertions.assertNotNull(existingDataFile.getCreatedAt());
+    }
 
 }
