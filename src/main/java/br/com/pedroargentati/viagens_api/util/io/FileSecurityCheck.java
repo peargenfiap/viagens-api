@@ -3,11 +3,13 @@ package br.com.pedroargentati.viagens_api.util.io;
 import br.com.pedroargentati.viagens_api.exceptions.BusinessException;
 import br.com.pedroargentati.viagens_api.exceptions.ViagensException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
+@Service
 public class FileSecurityCheck {
 
     private static final Logger logger = Logger.getLogger(FileSecurityCheck.class.getName());

@@ -4,20 +4,20 @@ import br.com.pedroargentati.viagens_api.dto.DataFileDTO;
 import br.com.pedroargentati.viagens_api.exceptions.BusinessException;
 import br.com.pedroargentati.viagens_api.exceptions.FileProcessingException;
 import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
+import br.com.pedroargentati.viagens_api.exceptions.ViagensException;
 import br.com.pedroargentati.viagens_api.model.DataFile;
 import br.com.pedroargentati.viagens_api.repository.DataFileRepository;
+import br.com.pedroargentati.viagens_api.util.crypto.HashUtil;
 import br.com.pedroargentati.viagens_api.util.io.FileSecurityCheck;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +31,11 @@ class DataFileServiceTest {
 
     @Mock
     private DataFileDTO dataFileDTO;
+
+    @Captor
+    private ArgumentCaptor<DataFile> dataFileCaptor;
+
+    private DataFileDTO dto;
 
     @Mock
     private FileSecurityCheck fileSecurityCheck;
@@ -140,6 +145,7 @@ class DataFileServiceTest {
     }
 
     @Test
+    @DisplayName("[incluirDataFile] - Deve lançar uma exceção ao incluir um DataFile com DataFile inválido")
     void deveLancarFileProcessingExceptionQuandoCheckFalhar() throws Exception {
         // Arrange
         String idFile = "ec15d2f24e19845b77489e0a2af2f8af4bf36560";
@@ -157,5 +163,50 @@ class DataFileServiceTest {
         // Act & Assert
         Assertions.assertThrows(FileProcessingException.class, () -> dataFileService.incluirDataFile(dataFileDTO));
     }
+
+    @Test
+    @DisplayName("[incluirDataFile] - Deve chamar o FileSecurityCheck quando os parâmetros estiverem corretos")
+    void deveChamarOFileSecurityCheckQuandoOsPrametrosEstiveremCorretos() throws ViagensException, IOException {
+        // Arrange
+        String idFile = "ec15d2f24e19845b77489e0a2af2f8af4bf36560";
+        String fileName = "arquivo.pdf";
+        String mediaType = "application/pdf";
+        byte[] data = "conteúdo do arquivo".getBytes();
+        Integer size = 120;
+
+        // Act
+        dataFileService.incluirDataFile(new DataFileDTO(idFile, fileName, mediaType, size, data));
+
+        // Assert
+        Mockito.verify(fileSecurityCheck).check(Mockito.eq(fileName), Mockito.eq(mediaType), Mockito.any(ByteArrayInputStream.class));
+    }
+
+    @Test
+    void deveSalvarDataFileQuandoNaoExistirDataFileExistente() throws ViagensException {
+        // Arrange
+        String idFile = "ec15d2f24e19845b77489e0a2af2f8af4bf36560";
+        String fileName = "arquivo.pdf";
+        String mediaType = "application/pdf";
+        byte[] data = "conteúdo do arquivo".getBytes();
+        Integer size = 120;
+
+        this.dto = new DataFileDTO(idFile, fileName, mediaType, size, data);
+
+        // Act
+        dataFileService.incluirDataFile(this.dto);
+
+        // Assert
+        BDDMockito.then(dataFileRepository).should().save(dataFileCaptor.capture());
+        String hash = HashUtil.calcularHash(this.dto.data(), "SHA-1");
+
+        DataFile dataFileSaved = dataFileCaptor.getValue();
+        Assertions.assertEquals(hash, dataFileSaved.getIdFile());
+        Assertions.assertEquals(fileName, dataFileSaved.getFileName());
+        Assertions.assertEquals(mediaType, dataFileSaved.getMediaType());
+        Assertions.assertEquals(size, dataFileSaved.getSize());
+        Assertions.assertEquals(data, dataFileSaved.getData());
+        Assertions.assertNotNull(dataFileSaved.getCreatedAt());
+    }
+
 
 }
