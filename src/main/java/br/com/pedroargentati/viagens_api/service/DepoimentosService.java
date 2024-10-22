@@ -73,9 +73,12 @@ public class DepoimentosService {
     @Transactional
     public void incluirDepoimento(DepoimentosDTO dto) throws RecordNotFoundException {
         logger.info("Incluindo depoimento" + dto.toString());
-        DataFile dataFile = dto.idFile() != null
-                ? this.dataFileService.obterDataFile(dto.idFile())
-                : null;
+        DataFile dataFile = null;
+        try {
+            dataFile = this.dataFileService.obterDataFile(dto.idFile(), false);
+        } catch (RecordNotFoundException e) {
+            // Se não encontrar o arquivo, inluir idFile como null.
+        }
 
         Depoimentos depoimento = Depoimentos.builder()
                 .depoimento(dto.depoimento())

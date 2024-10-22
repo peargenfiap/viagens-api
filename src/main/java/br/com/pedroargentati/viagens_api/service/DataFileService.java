@@ -36,9 +36,16 @@ public class DataFileService {
                 .orElse(null);
     }
 
+    public DataFile obterDataFile(String idFile, boolean throwEx) throws RecordNotFoundException {
+        Optional<DataFile> dataFile = dataFileRepository.findById(idFile);
+        if (throwEx) {
+            return dataFile.orElseThrow(() -> new RecordNotFoundException("Arquivo com ID " + idFile + " não encontrado"));
+        }
+        return dataFile.orElse(null);
+    }
+
     public DataFile obterDataFile(String idFile) throws RecordNotFoundException {
-        return dataFileRepository.findById(idFile)
-                .orElseThrow(() -> new RecordNotFoundException("Arquivo com ID " + idFile + " não encontrado"));
+        return this.obterDataFile(idFile, true);
     }
 
     /*

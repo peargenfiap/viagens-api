@@ -106,6 +106,20 @@ class DataFileServiceTest {
     }
 
     @Test
+    @DisplayName("[obterDataFile] - Deve retornar null quando chave inválida e parâmetro thowEx for false")
+    void deveRetornarNUllQuandoInformadoChaveINvalidaEParametroThrowExForFalse() throws RecordNotFoundException {
+        // Arrange
+        String idFile = "chave-invalida";
+
+        BDDMockito.given(dataFileRepository.findById(idFile)).willReturn(Optional.empty());
+
+        // Act
+        DataFile result = dataFileService.obterDataFile(idFile, false);
+        // Act & Assert
+        Assertions.assertNull(result);
+    }
+
+    @Test
     @DisplayName("[incluirDataFile] - Deve lançar uma exceção ao incluir um DataFile sem DataFile")
     void deveLancarExcecaoAoIncluirUmDataFileSemDataFile() {
         // Arrange
