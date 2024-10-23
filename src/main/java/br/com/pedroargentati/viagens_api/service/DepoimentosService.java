@@ -102,9 +102,12 @@ public class DepoimentosService {
         Depoimentos depoimento = depoimentosRepository.findById(dto.id())
                 .orElseThrow(() -> new RecordNotFoundException("Depoimento com ID " + dto.id() + " não encontrado"));
 
-        DataFile dataFile = dto.idFile() != null
-                ? this.dataFileService.obterDataFile(dto.idFile())
-                : null;
+        DataFile dataFile = null;
+        try {
+            dataFile = this.dataFileService.obterDataFile(dto.idFile(), false);
+        } catch (RecordNotFoundException e) {
+            // Se não encontrar o arquivo, inluir idFile como null.
+        }
 
         depoimento = Depoimentos.builder()
                 .id(depoimento.getId())

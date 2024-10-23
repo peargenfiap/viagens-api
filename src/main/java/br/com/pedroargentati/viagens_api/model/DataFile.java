@@ -17,6 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode(of = "idFile")
+@Builder
 public class DataFile {
 
     @Id

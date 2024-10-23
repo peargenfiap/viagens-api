@@ -2,7 +2,9 @@ package br.com.pedroargentati.viagens_api.service;
 
 import br.com.pedroargentati.viagens_api.dto.DepoimentosDTO;
 import br.com.pedroargentati.viagens_api.exceptions.RecordNotFoundException;
+import br.com.pedroargentati.viagens_api.model.DataFile;
 import br.com.pedroargentati.viagens_api.model.Depoimentos;
+import br.com.pedroargentati.viagens_api.repository.DataFileRepository;
 import br.com.pedroargentati.viagens_api.repository.DepoimentosRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -20,8 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class DepoimentosServiceTest {
@@ -31,6 +32,9 @@ class DepoimentosServiceTest {
 
     @Mock
     private DataFileService dataFileService;
+
+    @Mock
+    private DataFileRepository dataFileRepository;
 
     @InjectMocks
     private DepoimentosService depoimentosService;
@@ -186,6 +190,61 @@ class DepoimentosServiceTest {
         assertEquals(dto.nomePessoa(), depoimentoSaved.getNomePessoa());
         assertNull(depoimentoSaved.getDataFile());
         assertNull(depoimentoSaved.getDataAtualizacao());
+    }
+
+    @Test
+    @DisplayName("Deve lançar uma exceção quando um Depoimento com id inválido for informado")
+    void deveLancarUmaExcecaoQuandoUmDepoimentoComIdInvalidoForInformadoNaAtualizacao() {
+        // Arrange
+        DepoimentosDTO dto = new DepoimentosDTO(1, null, "Depoimento 1", "Pessoa 1", new Date(), null);
+
+        BDDMockito.given(depoimentosRepository.findById(dto.id())).willReturn(Optional.empty());
+
+        // Act + Assert
+        Assertions.assertThrows(RecordNotFoundException.class, () -> depoimentosService.atualizarDepoimento(dto));
+    }
+
+    @Test
+    @DisplayName("Deve alterar um depoimento com idFile como null quando DataFile não for encontrado e throwEx for false")
+    void deveAtualizarUmDepoimentoComIdFileComoNullQuandoDataFileNaoForEncontradoNaAtualizacao() throws RecordNotFoundException {
+        // Arrange
+        DepoimentosDTO dto = new DepoimentosDTO(1, null, "Depoimento 1", "Pessoa 1", new Date(), null);
+
+        BDDMockito.given(depoimentosRepository.findById(dto.id())).willReturn(Optional.of(Depoimentos.builder().build()));
+        BDDMockito.given(dataFileService.obterDataFile(Mockito.eq(null), Mockito.eq(false))).willReturn(null);
+
+        // Act
+        depoimentosService.atualizarDepoimento(dto);
+
+        // Assert
+        BDDMockito.then(depoimentosRepository).should().save(depoimentoCaptor.capture());
+
+        Depoimentos depoimentoSaved = depoimentoCaptor.getValue();
+        assertEquals(dto.depoimento(), depoimentoSaved.getDepoimento());
+        assertEquals(dto.nomePessoa(), depoimentoSaved.getNomePessoa());
+        assertNull(depoimentoSaved.getDataFile());
+    }
+
+    @Test
+    @DisplayName("Deve alterar um depoimento com idFile na atualização")
+    void deveAtualizarUmDepoimentoComIdFileNaAtualizacao() throws RecordNotFoundException {
+        // Arrange
+        DepoimentosDTO dto = new DepoimentosDTO(1, null, "Depoimento 1", "Pessoa 1", new Date(), null);
+
+        BDDMockito.given(depoimentosRepository.findById(dto.id())).willReturn(Optional.of(Depoimentos.builder().build()));
+
+        BDDMockito.given(dataFileService.obterDataFile(Mockito.eq(dto.idFile()), Mockito.eq(false))).willReturn(DataFile.builder().build());
+
+        // Act
+        depoimentosService.atualizarDepoimento(dto);
+
+        // Assert
+        BDDMockito.then(depoimentosRepository).should().save(depoimentoCaptor.capture());
+
+        Depoimentos depoimentoSaved = depoimentoCaptor.getValue();
+        assertEquals(dto.depoimento(), depoimentoSaved.getDepoimento());
+        assertEquals(dto.nomePessoa(), depoimentoSaved.getNomePessoa());
+        assertNotNull(depoimentoSaved.getDataFile());
     }
 
 }
